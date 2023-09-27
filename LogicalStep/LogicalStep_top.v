@@ -1,0 +1,190 @@
+// Copyright (C) 2016 Trevor Smouter
+
+
+`define LCD
+`define LED
+`define EGM_LED
+`define pb_n_filters
+`define SlideSwitches
+`define PushButtons
+`define SevenSegment
+`define AudioCodec
+`define UART
+`define SDCard 
+`define SDRAM 
+
+module LogicalStep_top
+(
+	input				rst_n,		//reset in
+	input          clkin_50,	//clock in
+
+`ifdef LCD
+	inout		[7:0] lcd_d,
+	output			lcd_en,
+	output			lcd_rw,
+	output			lcd_rs,
+`endif
+
+`ifdef EGM_LED
+	output	[3:0]	egm_leds,
+`endif
+
+`ifdef LED
+	output	[3:0]	leds,
+`endif
+
+`ifdef SlideSwitches
+	input		[7:0]	sw,
+`endif
+
+`ifdef PushButtons
+	input		[3:0]	pb_n,
+`endif
+
+`ifdef SevenSegment
+	output	[7:0]	seg7_data,
+	output			seg7_char1,
+	output			seg7_char2,
+`endif
+
+`ifdef AudioCodec
+	output			aud_scl,
+	inout				aud_sda,
+	output			aud_mclk,
+	input				aud_bclk,
+	output			aud_dac_dat,
+	input				aud_dac_lrck,
+	input				aud_adc_dat,
+	input				aud_adc_lrck,	
+`endif
+
+`ifdef UART
+	input				uart_rx,
+	output			uart_tx,
+`endif
+
+`ifdef SDCard
+	inout				sd_cmd,
+	output			sd_clk,
+	inout				sd_dat3,
+	inout				sd_dat0,
+`endif
+
+`ifdef SDRAM
+	output	[12:0]sdram_a,
+	output	[1:0]	sdram_ba,
+	output			sdram_clk,
+	output			sdram_cke,
+	output			sdram_cs_n,
+	output			sdram_ras_n,
+	output			sdram_cas_n,
+	inout		[15:0]sdram_dq,
+	output	[1:0] sdram_dqm,
+	output			sdram_we_n
+`endif
+
+
+);
+
+//these are used as intermediate signals
+	wire 				stimulus;
+	wire				response;
+	// wire [3:0]	leds; Commented out since it is configured for simulation
+	
+// push button cross-talk filter
+	wire		 [3:0]pb_n_fltrd;
+	
+	pb_n_filters U1 (
+		.clk (clkin_50),
+		.pb_n (pb_n), 
+		.pb_n_fltrd (pb_n_fltrd)
+	);
+
+//place Qsys instance below here
+
+
+QD1 u0 (
+	.audio_i2c_SDAT             (aud_sda),             //     audio_i2c.SDAT
+	.audio_i2c_SCLK             (aud_scl),             //              .SCLK
+	.audio_mclk_clk             (aud_mclk),             //    audio_mclk.clk
+	.audio_out_ADCDAT           (aud_adc_dat),           //     audio_out.ADCDAT
+	.audio_out_ADCLRCK          (aud_adc_lrck),          //              .ADCLRCK
+	.audio_out_BCLK             (aud_bclk),             //              .BCLK
+	.audio_out_DACDAT           (aud_dac_dat),           //              .DACDAT
+	.audio_out_DACLRCK          (aud_dac_lrck),          //              .DACLRCK
+	.button_pio_export          (pb_n_fltrd),          //    button_pio.export
+	.clk_50_clk                 (clkin_50),                 //        clk_50.clk
+	.egm_interface_stimulus     (stimulus),     // egm_interface.stimulus
+	.egm_interface_response     (response),     //              .response
+	.egm_interface_egm_leds     (egm_leds),     //              .egm_leds
+	.lcd_display_RS             (lcd_rs),             //   lcd_display.RS
+	.lcd_display_RW             (lcd_rw),             //              .RW
+	.lcd_display_data           (lcd_d),           //              .data
+	.lcd_display_E              (lcd_en),              //              .E
+	.led_pio_export             (leds),             //       led_pio.export
+	.reset_n_reset_n            (rst_n),            						 //       reset_n.reset_n
+	.response_out_export        (response),        							 //  response_out.export
+	.sdram_0_addr               (sdram_a),               					 //       sdram_0.addr
+	.sdram_0_ba                 (sdram_ba),                 				 //              .ba
+	.sdram_0_cas_n              (sdram_cas_n),              				 //              .cas_n
+	.sdram_0_cke                (sdram_cke),                				 //              .cke
+	.sdram_0_cs_n               (sdram_cs_n),               				 //              .cs_n
+	.sdram_0_dq                 (sdram_dq),                 				 //              .dq
+	.sdram_0_dqm                (sdram_dqm),                				 //              .dqm
+	.sdram_0_ras_n              (sdram_ras_n),              				 //              .ras_n
+	.sdram_0_we_n               (sdram_we_n),               				 //              .we_n
+	.sdram_clk_clk              (sdram_clk),              					 //     sdram_clk.clk
+	.segment_drive_segment_data (seg7_data), 		// segment_drive.segment_data
+	.segment_drive_digit1       (seg7_char1),       //              .digit1
+	.segment_drive_digit2       (seg7_char2),       //              .digit2
+	.stimulus_in_export         (stimulus),         //   stimulus_in.export
+	.switch_pio_export          (sw),          	//    switch_pio.export
+	.uart_rxd                   (uart_rx),          //          uart.rxd
+	.uart_txd                   (uart_tx)           //              .txd
+);
+
+
+	// QD1 u0 (
+	// 	.audio_i2c_SDAT             (<connected-to-audio_i2c_SDAT>),             //     audio_i2c.SDAT
+	// 	.audio_i2c_SCLK             (<connected-to-audio_i2c_SCLK>),             //              .SCLK
+	// 	.audio_mclk_clk             (<connected-to-audio_mclk_clk>),             //    audio_mclk.clk
+	// 	.audio_out_ADCDAT           (<connected-to-audio_out_ADCDAT>),           //     audio_out.ADCDAT
+	// 	.audio_out_ADCLRCK          (<connected-to-audio_out_ADCLRCK>),          //              .ADCLRCK
+	// 	.audio_out_BCLK             (<connected-to-audio_out_BCLK>),             //              .BCLK
+	// 	.audio_out_DACDAT           (<connected-to-audio_out_DACDAT>),           //              .DACDAT
+	// 	.audio_out_DACLRCK          (<connected-to-audio_out_DACLRCK>),          //              .DACLRCK
+	// 	.button_pio_export          (<connected-to-button_pio_export>),          //    button_pio.export
+	// 	.clk_50_clk                 (<connected-to-clk_50_clk>),                 //        clk_50.clk
+	// 	.egm_interface_stimulus     (<connected-to-egm_interface_stimulus>),     // egm_interface.stimulus
+	// 	.egm_interface_response     (<connected-to-egm_interface_response>),     //              .response
+	// 	.egm_interface_egm_leds     (<connected-to-egm_interface_egm_leds>),     //              .egm_leds
+	// 	.lcd_display_RS             (<connected-to-lcd_display_RS>),             //   lcd_display.RS
+	// 	.lcd_display_RW             (<connected-to-lcd_display_RW>),             //              .RW
+	// 	.lcd_display_data           (<connected-to-lcd_display_data>),           //              .data
+	// 	.lcd_display_E              (<connected-to-lcd_display_E>),              //              .E
+	// 	.led_pio_export             (<connected-to-led_pio_export>),             //       led_pio.export
+	// 	.reset_n_reset_n            (<connected-to-reset_n_reset_n>),            //       reset_n.reset_n
+	// 	.response_out_export        (<connected-to-response_out_export>),        //  response_out.export
+	// 	.sdram_0_addr               (<connected-to-sdram_0_addr>),               //       sdram_0.addr
+	// 	.sdram_0_ba                 (<connected-to-sdram_0_ba>),                 //              .ba
+	// 	.sdram_0_cas_n              (<connected-to-sdram_0_cas_n>),              //              .cas_n
+	// 	.sdram_0_cke                (<connected-to-sdram_0_cke>),                //              .cke
+	// 	.sdram_0_cs_n               (<connected-to-sdram_0_cs_n>),               //              .cs_n
+	// 	.sdram_0_dq                 (<connected-to-sdram_0_dq>),                 //              .dq
+	// 	.sdram_0_dqm                (<connected-to-sdram_0_dqm>),                //              .dqm
+	// 	.sdram_0_ras_n              (<connected-to-sdram_0_ras_n>),              //              .ras_n
+	// 	.sdram_0_we_n               (<connected-to-sdram_0_we_n>),               //              .we_n
+	// 	.segment_drive_segment_data (<connected-to-segment_drive_segment_data>), // segment_drive.segment_data
+	// 	.segment_drive_digit1       (<connected-to-segment_drive_digit1>),       //              .digit1
+	// 	.segment_drive_digit2       (<connected-to-segment_drive_digit2>),       //              .digit2
+	// 	.spi_master_export          (<connected-to-spi_master_export>),          //    spi_master.export
+	// 	.stimulus_in_export         (<connected-to-stimulus_in_export>),         //   stimulus_in.export
+	// 	.switch_pio_export          (<connected-to-switch_pio_export>),          //    switch_pio.export
+	// 	.uart_rxd                   (<connected-to-uart_rxd>),                   //          uart.rxd
+	// 	.uart_txd                   (<connected-to-uart_txd>),                   //              .txd
+	// 	.sdram_clk_clk              (<connected-to-sdram_clk_clk>)               //     sdram_clk.clk
+	// );
+
+//place Qsys instance above here
+
+endmodule

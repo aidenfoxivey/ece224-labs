@@ -1,0 +1,20 @@
+db
+*.swp
+*.bak
+*.d
+*~
+incremental_db
+output_files
+*.qws
+software/.metadata
+*.o
+software/*/obj
+*.pdom
+*.elf
+*.objdump
+software/*/*.map
+software/*/*.a
+.vscode
+
+#TODO are we sure about this?
+simulation
