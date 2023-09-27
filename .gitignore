@@ -9,6 +9,8 @@ output_files
 software/.metadata
 *.o
 software/*/obj
+
+.DS_Store
 *.pdom
 *.elf
 *.objdump
