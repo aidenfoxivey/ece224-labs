@@ -10,7 +10,6 @@ software/.metadata
 *.o
 software/*/obj
 
-.DS_Store
 *.pdom
 *.elf
 *.objdump
@@ -20,3 +19,4 @@ software/*/*.a
 
 #TODO are we sure about this?
 simulation
+.DS_Store

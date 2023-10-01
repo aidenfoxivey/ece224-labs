@@ -89,8 +89,21 @@
          type = "String";
       }
    }
+   element button_pio.irq
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
+   }
    element button_pio.s1
    {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
       datum baseAddress
       {
          value = "16781520";
@@ -265,6 +278,14 @@
       {
          value = "8";
          type = "int";
+      }
+   }
+   element switch_pio.clk
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
       }
    }
    element switch_pio.s1
